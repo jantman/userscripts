@@ -13,7 +13,7 @@
 // @require     https://api.trello.com/1/client.js?key=d141cd6874d46ba92770697e7721a614
 // @downloadURL https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
 // @updateURL   https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
-// @version     0.1.1
+// @version     0.1.2
 // ==/UserScript==
 
 var trello_api_key = 'd141cd6874d46ba92770697e7721a614';
@@ -21,6 +21,7 @@ var trello_api_baseUrl = 'https://api.trello.com/1';
 var trello_user_token = store('trello_user_token');
 var trello_cache = {};
 var waiting_callbacks = {};
+var board_ids = {};
 
 // logging
 var log_levels = { trace: 5, debug: 4, info: 3, warn: 2, err: 1, off: 0 };
@@ -331,11 +332,12 @@ function updateBoardOptions(boards) {
     for ( var i in boards ) {
 	debug("board " + boards[i].id + " name: " + boards[i].name);
         waiting_callbacks[boards[i].id] = 1;
+        board_ids[boards[i].id] = boards[i].name;
         GM_xmlhttpRequest(
 	    trello_get(
 	        sprintf('boards/%s/lists?filter=open', boards[i].id),
 	        function(response) {
-		    updateListOptions(JSON.parse(response.responseText), boards[i].id, boards[i].name);
+		    updateListOptions(JSON.parse(response.responseText));
 	        }
 	    )
         );
@@ -343,10 +345,13 @@ function updateBoardOptions(boards) {
 }
 
 // modified by jantman
-function updateListOptions(lists, board_id, board_name) {
-    delete waiting_callbacks[board_id];
-    trace('enter updateListOptions, board_name=' + board_name);
+function updateListOptions(lists) {
     for ( var i in lists) {
+        board_id = lists[i].idBoard;
+        board_name = board_ids[board_id];
+        if (waiting_callbacks.hasOwnProperty(board_id)) {
+            delete waiting_callbacks[board_id];
+        }
         trello_cache[board_name + ': ' + lists[i].name] = lists[i].id;
     }
 }
