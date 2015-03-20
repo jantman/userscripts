@@ -24,7 +24,7 @@ var waiting_callbacks = {};
 
 // logging
 var log_levels = { trace: 5, debug: 4, info: 3, warn: 2, err: 1, off: 0 };
-var log_level = 6;
+var log_level = 2;
 
 function trace(msg) {if (log_level > log_levels.trace) console.log(sprintf('trace: %s', msg));}
 function debug(msg) {if (log_level > log_levels.debug) console.log(sprintf('debug: %s', msg));}
