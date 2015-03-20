@@ -202,58 +202,63 @@ function store(key, value) {
 
 function add_card(card, listid) {
     // Create the card
-    Trello.post('lists/' + listid + '/cards', card,
-                function(card) {
-                    // Display a little notification in the upper-left corner with a link to the card
-                    // that was just created
-                    var $cardLink = $('<a>')
-                        .attr({
-                            href: card.url,
-                            target: 'card'
-                        })
-                        .text('Created a Trello Card')
-                        .css({
-                            position: 'absolute',
-                            left: 0,
-                            top: 0,
-                            padding: '4px',
-                            border: '1px solid #000',
-                            background: '#fff',
-                            'z-index': 1e3
-                        })
-                        .appendTo('body');
-
-                    setTimeout(function() {
-                        $cardLink.fadeOut(3000);
-                    }, 5000);
-                });
+    GM_xmlhttpRequest(
+        trello_post('lists/' + listid + '/cards',
+                    card,
+                    function(card) {
+                        // Display a little notification in the upper-left corner with a link to the card
+                        // that was just created
+                        var $cardLink = $('<a>')
+                            .attr({
+                                href: card.url,
+                                target: 'card'
+                            })
+                            .text('Created a Trello Card')
+                            .css({
+                                position: 'absolute',
+                                left: 0,
+                                top: 0,
+                                padding: '4px',
+                                border: '1px solid #000',
+                                background: '#fff',
+                                'z-index': 1e3
+                            })
+                            .appendTo('body');
+                        
+                        setTimeout(function() {
+                            $cardLink.fadeOut(3000);
+                        }, 5000);
+                    },
+                    function(card) {
+                        // Display a little notification in the upper-left corner with a link to the card
+                        // that was just created
+                        var $cardLink = $('<a>')
+                            .attr({
+                                href: card.url,
+                                target: 'card'
+                            })
+                            .text('ERROR Creating Trello Card')
+                            .css({
+                                position: 'absolute',
+                                left: 0,
+                                top: 0,
+                                padding: '4px',
+                                border: '1px solid #000',
+                                background: '#fff',
+                                'z-index': 1e3
+                            })
+                            .appendTo('body');
+                        
+                        setTimeout(function() {
+                            $cardLink.fadeOut(3000);
+                        }, 5000);
+                    }));
 }
 
 /*
  * Begin code taken in whole or part from:
  * <https://gist.github.com/aggieben/5811685/948df5f0a955b1b083186535378936ccda5ca6ea>
  */
-
-/*
-    info("create the card for post " + $parent.attr(idattr));
-    var cardTitle = $('#question-header a').text();
-    var cardText = sprintf('[Meta Post](https://%s/q/%s)\n\n---\n\n%s', 
-                            window.location.host,
-                            $parent.attr(idattr),
-                            $parent.find('div.post-text').html());
-    createTrelloCard({
-      name: cardTitle,
-      desc: toMarkdown(cardText.trim()),
-      listId: $('select.list').val(),
-      labels: [$('select.labels').val()],
-      success: function(data) {
-        $div.fadeOut('fast', function() {
-          $(this).trigger('removing').remove();
-        });
-      }
-    });
-  });
-*/
 
 function trelloAuthorize() {
   Trello.authorize({
@@ -371,14 +376,6 @@ function loadTrelloBoards() {
         )
     );
     waitForCallbacks();
-}
-
-function createTrelloCard(options) {
-  GM_xmlhttpRequest(
-    trello_post(
-      'cards',
-      { name: options.name, idList: options.listId, labels: options.labels, due: null, desc: options.desc },
-      options.success));
 }
 
 function waitForCallbacks() {
