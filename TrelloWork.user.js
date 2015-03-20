@@ -41,11 +41,16 @@ body.addEventListener('contextmenu', initMenu, false);
 
 function add_to_menu(menu_id) {
     trace('enter add_to_menu');
+    console.log('cache: %o', trello_cache);
     $('#' + menu_id).append('<menu label="Add to Trello" id="userscript-trello-add-menu"></menu>');
     var menu = $('#userscript-trello-add-menu');
     // add items here
-    //menuhtml += '<menuitem label="Add to Trello: Work" id="userscript-trello-work-add"></menuitem>';
-    menu.append('<hr><menuitem label="Refresh Lists" id="userscript-trello-contextmenu-refresh"></menuitem>');
+    var lists = Object.keys(trello_cache).sort();
+    for (var i = 0; i < lists.length; i++) {
+        menu.append('<menuitem label="' + lists[i] + '" id="userscript-trello-contextmenu-' + trello_cache[lists[i]] + '"></menuitem>');
+        $('#userscript-trello-contextmenu-' + trello_cache[lists[i]]).click(doTrelloAdd);
+    }
+    menu.append('<hr><menuitem label="(Refresh Lists)" id="userscript-trello-contextmenu-refresh"></menuitem>');
     $('#userscript-trello-contextmenu-refresh').click(refreshLists);
 }
 
@@ -53,7 +58,12 @@ function initMenu(aEvent) {
     // Executed when user right click on web page body
     // aEvent.target is the element you right click on
     trace('enter initMenu');
-    console.log('%o', trello_cache);
+    var foo = store('trello_cache');
+    if (foo) {
+        trello_cache = JSON.parse(foo);
+    } else {
+        trello_cache = {};
+    }
     var existing_menu = body.getAttribute('contextmenu');
     if (! existing_menu) {
         // add a new menu
@@ -78,6 +88,8 @@ function doTrelloAdd(aEvent) {
     // Executed when user click on menuitem
     // aEvent.target is the <menuitem> element
     trace('enter doTrelloAdd');
+    var listid = aEvent.target.id.replace('userscript-trello-contextmenu-', '');
+    debug('add to list: ' + listid);
     if (!trello_user_token) {
         debug('authorizing...');
         trelloAuthorize();
@@ -85,7 +97,8 @@ function doTrelloAdd(aEvent) {
         debug('using token: ' + trello_user_token);
     }
     card = makecard();
-    console.log(card);
+    console.log('card: %o', card);
+    add_card(card, listid);
 }
 
 /*
@@ -187,35 +200,33 @@ function store(key, value) {
     }
 }
 
-function add_card(card) {
+function add_card(card, listid) {
     // Create the card
-    if (name) {
-        Trello.post('lists/' + trelloIdList + '/cards', card,
-                    function(card) {
-                        // Display a little notification in the upper-left corner with a link to the card
-                        // that was just created
-                        var $cardLink = $('<a>')
-                            .attr({
-                                href: card.url,
-                                target: 'card'
-                            })
-                            .text('Created a Trello Card')
-                            .css({
-                                position: 'absolute',
-                                left: 0,
-                                top: 0,
-                                padding: '4px',
-                                border: '1px solid #000',
-                                background: '#fff',
-                                'z-index': 1e3
-                            })
-                            .appendTo('body');
+    Trello.post('lists/' + listid + '/cards', card,
+                function(card) {
+                    // Display a little notification in the upper-left corner with a link to the card
+                    // that was just created
+                    var $cardLink = $('<a>')
+                        .attr({
+                            href: card.url,
+                            target: 'card'
+                        })
+                        .text('Created a Trello Card')
+                        .css({
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            padding: '4px',
+                            border: '1px solid #000',
+                            background: '#fff',
+                            'z-index': 1e3
+                        })
+                        .appendTo('body');
 
-                        setTimeout(function() {
-                            $cardLink.fadeOut(3000);
-                        }, 5000);
-                    });
-    }
+                    setTimeout(function() {
+                        $cardLink.fadeOut(3000);
+                    }, 5000);
+                });
 }
 
 /*
@@ -378,10 +389,9 @@ function waitForCallbacks() {
         }
     }
     debug('waiting on ' + waiting + ' callbacks');
-    if (waiting == 0) {
-        return;
+    if (waiting > 0) {
+        // wait 50ms and try again
+        setTimeout(waitForCallbacks, 50);
     }
-    console.log('callbacks waiting: %o', waiting_callbacks);
-    // wait 50ms and try again
-    setTimeout(waitForCallbacks, 50);
+    store('trello_cache', JSON.stringify(trello_cache));
 }
