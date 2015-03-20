@@ -39,43 +39,39 @@ if (!('contextMenu' in document.documentElement &&
 var body = document.body;
 body.addEventListener('contextmenu', initMenu, false);
 
-function menuContent() {
-    trace('enter menuContent');
-    if (!trello_user_token) {
-        debug('authorizing...');
-        trelloAuthorize();
-    } else {
-        debug('using token: ' + trello_user_token);
-    }
-    menuhtml = '<menu label="Add to Trello" id="userscript-trello-add-menu">';
+function add_to_menu(menu_id) {
+    trace('enter add_to_menu');
+    $('#' + menu_id).append('<menu label="Add to Trello" id="userscript-trello-add-menu"></menu>');
+    var menu = $('#userscript-trello-add-menu');
+    // add items here
     //menuhtml += '<menuitem label="Add to Trello: Work" id="userscript-trello-work-add"></menuitem>';
-    menuhtml += '<hr><menuitem label="Refresh Lists" id="userscript-trello-contextmenu-refresh"></menuitem>';
-    menuhtml += '</menu>';
-    return menuhtml;
+    menu.append('<hr><menuitem label="Refresh Lists" id="userscript-trello-contextmenu-refresh"></menuitem>');
+    $('#userscript-trello-contextmenu-refresh').click(refreshLists);
 }
 
 function initMenu(aEvent) {
     // Executed when user right click on web page body
     // aEvent.target is the element you right click on
     trace('enter initMenu');
+    console.log('%o', trello_cache);
     var existing_menu = body.getAttribute('contextmenu');
     if (! existing_menu) {
-        // add a new menu with our item in it
-        $(body).append('<menu id="userscript-context-menu" type="context">' + menuContent() + '</menu>');
-        // set the click handler
-        $('#userscript-trello-work-add').click(doTrelloAdd);
+        // add a new menu
+        $(body).append('<menu id="userscript-context-menu" type="context"></menu>');
+        // add our submenu to it
+        add_to_menu('userscript-context-menu');
         // set the body contextmenu attribute to our new menu
         $(body).attr('contextmenu', 'userscript-context-menu');
-    } else if (! $('#userscript-trello-work-add').length) {
-        merge_menus(existing_menu);
+    } else if (! $('#userscript-trello-add-menu').length) {
+        add_to_menu(existing_menu);
     }
 }
 
-function merge_menus(existing_menu) {
-    // if the body 'contextmenu' attribute is already set,
-    // just append our menu item to it
-    $('#' + existing_menu).append(menuContent());
-    $('#userscript-trello-work-add').click(doTrelloAdd);
+function refreshLists() {
+    // refresh the Trello boards and lists
+    trello_cache = {};
+    $('#userscript-trello-add-menu').remove();
+    loadTrelloBoards();
 }
 
 function doTrelloAdd(aEvent) {
@@ -326,13 +322,19 @@ function updateListOptions(lists, board_id, board_name) {
     delete waiting_callbacks[board_id];
     trace('enter updateListOptions, board_name=' + board_name);
     for ( var i in lists) {
-        debug('list id=' + lists[i].id + ' name=' + lists[i].name);
+        trello_cache[board_name + ': ' + lists[i].name] = lists[i].id;
     }
 }
 
 // modified by jantman
 function loadTrelloBoards() {
     trace('enter loadTrelloBoards');
+    if (!trello_user_token) {
+        debug('authorizing...');
+        trelloAuthorize();
+    } else {
+        debug('using token: ' + trello_user_token);
+    }
     waiting_callbacks['loadTrelloBoards'] = 1;
     console.log('callbacks waiting: %o', waiting_callbacks);
     GM_xmlhttpRequest(
