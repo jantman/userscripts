@@ -1,6 +1,6 @@
 ﻿// ==UserScript==
 // @name        TrelloContextMenu
-// @description Add page to a Trello board via context menu, with special handling for Jira, GitHub, FogBugz, Redmine and RT issues, and Gmail.
+// @description Add page to a Trello board via context menu, with special handling for Jira, GitHub, FogBugz, Redmine and RT issues, Gmail, and ReviewBoard code reviews.
 // @namespace   com.jasonantman.greasemonkey.trellocontextmenu
 // @author      Jason Antman <jason@jasonantman.com>
 // @copyright   2015 Jason Antman.
@@ -13,7 +13,7 @@
 // @require     https://api.trello.com/1/client.js?key=d141cd6874d46ba92770697e7721a614
 // @downloadURL https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
 // @updateURL   https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
-// @version     0.1.0
+// @version     0.1.1
 // ==/UserScript==
 
 var trello_api_key = 'd141cd6874d46ba92770697e7721a614';
@@ -164,12 +164,19 @@ function makecard() {
         // we're looking at an email in Gmail
         name = $('h1 .hP').text().trim();
 
+    } else if ($('div .review-request').length) {
+        var rb_re = /\/r\/(\d+)\//;
+        var res = rb_re.exec(window.location.href);
+        if (res) {
+            name = 'cr' + res[1] + ': ' + $('#summary').text().trim();
+        } else {
+            name = $.trim(document.title);
+        }
     }
-
+    
     else {
         // use page title as card title, taking trello as a "read-later" tool
         name = $.trim(document.title);
-
     }
 
     // Get any selected text

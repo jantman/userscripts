@@ -7,7 +7,7 @@ Copy page title and location as a markdown link context menu entry, removing ann
 
 ## [TrelloContextMenu](https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.user.js)
 
-Add page to a Trello board via context menu, with special handling for Jira, GitHub, FogBugz, Redmine and RT issues, and Gmail.
+Add page to a Trello board via context menu, with special handling for Jira, GitHub, FogBugz, Redmine and RT issues, Gmail, and ReviewBoard code reviews.
 
 Loads a list of all of your boards and lists, and provides a context menu to add the current page to one of them.
 
