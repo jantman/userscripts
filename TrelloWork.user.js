@@ -1,17 +1,19 @@
 ﻿// ==UserScript==
-// @name        TrelloWork
-// @namespace   com.jasonantman.greasemonkey.trellowork
+// @name        TrelloContextMenu
+// @description Add page to a Trello board via context menu, with special handling for Jira, GitHub, FogBugz, Redmine and RT issues, and Gmail.
+// @namespace   com.jasonantman.greasemonkey.trellocontextmenu
 // @author      Jason Antman <jason@jasonantman.com>
+// @copyright   2015 Jason Antman.
 // @include     *
 // @grant       GM_getValue
 // @grant       GM_setValue
 // @grant       GM_xmlhttpRequest
-// @description Add Jira or GitHub Issues to a Trello board.
 // @require     https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
 // @require     https://raw.githubusercontent.com/alexei/sprintf.js/master/dist/sprintf.min.js
 // @require     https://api.trello.com/1/client.js?key=d141cd6874d46ba92770697e7721a614
-// @version     0.0.1
-// @copyright   2015 Jason Antman.
+// @downloadURL https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
+// @updateURL   https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
+// @version     0.1.0
 // ==/UserScript==
 
 var trello_api_key = 'd141cd6874d46ba92770697e7721a614';
