@@ -13,7 +13,7 @@
 // @require     https://api.trello.com/1/client.js?key=d141cd6874d46ba92770697e7721a614
 // @downloadURL https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
 // @updateURL   https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
-// @version     0.1.2
+// @version     0.1.3
 // ==/UserScript==
 
 var trello_api_key = 'd141cd6874d46ba92770697e7721a614';
@@ -142,8 +142,9 @@ function makecard() {
 
     } else if ($('#show_issue').length) {
 
-      // We're looking at a GitHub issue
-      name = $('#show_issue .number strong').text() + ' ' + $('#show_issue .discussion-topic-title').text();
+        // We're looking at a GitHub issue
+        var ghtemp = $('.js-current-repository').attr('href');
+        name = ghtemp.replace(/^\//, '') + ' ' + $('#show_issue .gh-header-number').text() + ' ' + $('#show_issue .js-issue-title').text();
 
     } else if ($('#all_commit_comments').length) {
 
