@@ -16,6 +16,10 @@
 // @version     0.1.3
 // ==/UserScript==
 
+// NOTW: Right now this only works in Firefox, as Firefox is the only browser that currently
+// supports the HTML5 contextmenu standard.
+// For Chrome, see <https://code.google.com/p/chromium/issues/detail?id=87553>
+
 var trello_api_key = 'd141cd6874d46ba92770697e7721a614';
 var trello_api_baseUrl = 'https://api.trello.com/1';
 var trello_user_token = store('trello_user_token');
