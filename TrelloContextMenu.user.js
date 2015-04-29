@@ -13,12 +13,13 @@
 // @require     https://api.trello.com/1/client.js?key=d141cd6874d46ba92770697e7721a614
 // @downloadURL https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
 // @updateURL   https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
-// @version     0.1.3
+// @version     0.2.0
 // ==/UserScript==
 
-// NOTW: Right now this only works in Firefox, as Firefox is the only browser that currently
+// NOTE: Right now this only works in Firefox, as Firefox is the only browser that currently
 // supports the HTML5 contextmenu standard.
 // For Chrome, see <https://code.google.com/p/chromium/issues/detail?id=87553>
+
 
 var trello_api_key = 'd141cd6874d46ba92770697e7721a614';
 var trello_api_baseUrl = 'https://api.trello.com/1';
@@ -128,6 +129,7 @@ function makecard() {
     var name;
     // Default description is the URL of the page we're looking at
     var desc = location.href;
+    var due = '';
 
     if (window.goBug) {
 
@@ -178,8 +180,17 @@ function makecard() {
         } else {
             name = $.trim(document.title);
         }
+    } else if ($('div .where-fields').length) {
+	// version1
+	name = $.trim(document.title);
+	var v1due = jQuery('div a[data-assettype=Timebox]');
+	if (v1due.length) {
+	    v1due = v1due[0].text.trim();
+	    var date_s = v1due.substring(v1due.indexOf(' ') + 1).split('-');
+	    due = new Date(date_s[2] + '-' + date_s[0] + '-' + date_s[1]);
+	}
     }
-    
+
     else {
         // use page title as card title, taking trello as a "read-later" tool
         name = $.trim(document.title);
@@ -204,7 +215,11 @@ function makecard() {
     }
 
     name = name || 'Unknown page';
-    return {name: name, desc: desc};
+    data = {name: name, desc: desc};
+    if (due != '' ) {
+	data.due = due;
+    }
+    return data;
 }
 
 function store(key, value) {
