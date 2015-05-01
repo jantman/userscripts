@@ -12,9 +12,9 @@
 // @require     https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
 // @require     https://raw.githubusercontent.com/alexei/sprintf.js/master/dist/sprintf.min.js
 // @require     https://api.trello.com/1/client.js?key=d141cd6874d46ba92770697e7721a614
-// @downloadURL https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
-// @updateURL   https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
-// @version     0.3.0
+// @downloadURL https://github.com/jantman/userscripts/raw/master/TrelloContextMenu.user.js
+// @updateURL   https://github.com/jantman/userscripts/raw/master/TrelloContextMenu.user.js
+// @version     0.3.1
 // ==/UserScript==
 
 // NOTE: Right now this only works in Firefox, as Firefox is the only browser that currently
