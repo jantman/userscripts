@@ -31,11 +31,11 @@ var board_ids = {};
 var log_levels = { trace: 5, debug: 4, info: 3, warn: 2, err: 1, off: 0 };
 var log_level = 2;
 
-function trace(msg) {if (log_level > log_levels.trace) console.log(sprintf('trace: %s', msg));}
-function debug(msg) {if (log_level > log_levels.debug) console.log(sprintf('debug: %s', msg));}
-function info(msg) {if (log_level > log_levels.info) console.log(sprintf('info: %s', msg));}
-function warn(msg) {if (log_level > log_levels.warn) console.log(sprintf('warn: %s', msg));}
-function err(msg) {if (log_level > log_levels.err) console.log(sprintf('err: %s', msg));}
+function trace(msg) {if (log_level >= log_levels.trace) console.log(sprintf('trace: %s', msg));}
+function debug(msg) {if (log_level >= log_levels.debug) console.log(sprintf('debug: %s', msg));}
+function info(msg) {if (log_level >= log_levels.info) console.log(sprintf('info: %s', msg));}
+function warn(msg) {if (log_level >= log_levels.warn) console.log(sprintf('warn: %s', msg));}
+function err(msg) {if (log_level >= log_levels.err) console.log(sprintf('err: %s', msg));}
 // end logging
 
 // if we don't support contextMenu, just return now
