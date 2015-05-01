@@ -7,13 +7,14 @@
 // @include     *
 // @grant       GM_getValue
 // @grant       GM_setValue
+// @grant       GM_deleteValue
 // @grant       GM_xmlhttpRequest
 // @require     https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
 // @require     https://raw.githubusercontent.com/alexei/sprintf.js/master/dist/sprintf.min.js
 // @require     https://api.trello.com/1/client.js?key=d141cd6874d46ba92770697e7721a614
 // @downloadURL https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
 // @updateURL   https://raw.githubusercontent.com/jantman/userscripts/master/TrelloContextMenu.md
-// @version     0.2.0
+// @version     0.3.0
 // ==/UserScript==
 
 // NOTE: Right now this only works in Firefox, as Firefox is the only browser that currently
@@ -181,14 +182,14 @@ function makecard() {
             name = $.trim(document.title);
         }
     } else if ($('div .where-fields').length) {
-	// version1
-	name = $.trim(document.title);
-	var v1due = jQuery('div a[data-assettype=Timebox]');
-	if (v1due.length) {
-	    v1due = v1due[0].text.trim();
-	    var date_s = v1due.substring(v1due.indexOf(' ') + 1).split('-');
-	    due = new Date(date_s[2] + '-' + date_s[0] + '-' + date_s[1]);
-	}
+        // version1
+        name = $.trim(document.title);
+        var v1due = jQuery('div a[data-assettype=Timebox]');
+        if (v1due.length) {
+            v1due = v1due[0].text.trim();
+            var date_s = v1due.substring(v1due.indexOf(' ') + 1).split('-');
+            due = new Date(date_s[2] + '-' + date_s[0] + '-' + date_s[1]);
+        }
     }
 
     else {
@@ -217,7 +218,7 @@ function makecard() {
     name = name || 'Unknown page';
     data = {name: name, desc: desc};
     if (due != '' ) {
-	data.due = due;
+        data.due = due;
     }
     return data;
 }
@@ -230,59 +231,80 @@ function store(key, value) {
     }
 }
 
+function add_success_handler(response) {
+    // Display a little notification in the upper-left corner with a link to the card
+    // that was just created
+    if (log_level >= log_levels.trace) { console.log('response: %o', response); }
+    if (response.status == 401) {
+        err("Got 401 response - need to re-authenticate");
+        GM_deleteValue('trello_user_token');
+        trello_user_token = '';
+        alert("ERROR: invalid authorization token; attempting to re-authorize. You must recreate the card when authorization is complete.");
+        trelloAuthorize();
+    } else if (response.status == 200) {
+        cardinfo = JSON.parse(response.responseText);
+        show_success_popup(cardinfo.url);
+    } else {
+        show_error_popup("Card creation got unknown status code: " + response.status.toString());
+    }
+}
+
+function show_success_popup(card_url) {
+    info("Success: " + card_url);
+    var $cardLink = $('<a>')
+        .attr({
+            href: card_url,
+            target: 'card'
+        })
+        .text('Created a Trello Card')
+        .css({
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            padding: '4px',
+            border: '1px solid #000',
+            background: '#fff',
+            'z-index': 1e3
+        })
+        .appendTo('body');
+
+    setTimeout(function() {
+        $cardLink.fadeOut(3000);
+    }, 5000);
+}
+
+function add_failure_handler(response) {
+    // Display a little notification in the upper-left corner with a link to the card
+    // that was just created
+    if (log_level >= log_levels.trace) { console.log('response: %o', response); }
+    show_error_popup('ERROR Creating Trello Card');
+}
+
+function show_error_popup(msg) {
+    info("Failure: " + msg);
+    var $cardLink = $('<span>')
+        .text(msg)
+        .css({
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            padding: '4px',
+            border: '1px solid #000',
+            background: '#fff',
+            'z-index': 1e3
+        })
+        .appendTo('body');
+
+    setTimeout(function() {
+        $cardLink.fadeOut(3000);
+    }, 5000);
+}
+
 function add_card(card, listid) {
     // Create the card
     GM_xmlhttpRequest(
-        trello_post('lists/' + listid + '/cards',
-                    card,
-                    function(card) {
-                        // Display a little notification in the upper-left corner with a link to the card
-                        // that was just created
-                        var $cardLink = $('<a>')
-                            .attr({
-                                href: card.url,
-                                target: 'card'
-                            })
-                            .text('Created a Trello Card')
-                            .css({
-                                position: 'absolute',
-                                left: 0,
-                                top: 0,
-                                padding: '4px',
-                                border: '1px solid #000',
-                                background: '#fff',
-                                'z-index': 1e3
-                            })
-                            .appendTo('body');
-                        
-                        setTimeout(function() {
-                            $cardLink.fadeOut(3000);
-                        }, 5000);
-                    },
-                    function(card) {
-                        // Display a little notification in the upper-left corner with a link to the card
-                        // that was just created
-                        var $cardLink = $('<a>')
-                            .attr({
-                                href: card.url,
-                                target: 'card'
-                            })
-                            .text('ERROR Creating Trello Card')
-                            .css({
-                                position: 'absolute',
-                                left: 0,
-                                top: 0,
-                                padding: '4px',
-                                border: '1px solid #000',
-                                background: '#fff',
-                                'z-index': 1e3
-                            })
-                            .appendTo('body');
-                        
-                        setTimeout(function() {
-                            $cardLink.fadeOut(3000);
-                        }, 5000);
-                    }));
+        trello_post('lists/' + listid + '/cards', card, add_success_handler, add_failure_handler)
+    );
 }
 
 /*
@@ -308,20 +330,20 @@ function trelloAuthorize() {
 function trello_get(path, success, onerror) {
     var url = null;
     if (/\?/.test(path)) {
-	url = sprintf('%s/%s&key=%s&token=%s',
-		      trello_api_baseUrl, path, trello_api_key, trello_user_token);
+        url = sprintf('%s/%s&key=%s&token=%s',
+              trello_api_baseUrl, path, trello_api_key, trello_user_token);
     } else {
-	url = sprintf('%s/%s?key=%s&token=%s',
-		      trello_api_baseUrl, path, trello_api_key, trello_user_token);
+        url = sprintf('%s/%s?key=%s&token=%s',
+              trello_api_baseUrl, path, trello_api_key, trello_user_token);
     }
 
     debug('requesting: ' + url);
     return {
-	url: url,
-	method: 'GET',
-	headers: { "Accept": "application/json" },
-	onload: success,
-	onerror: onerror || function(response) { debug(response); }
+        url: url,
+        method: 'GET',
+        headers: { "Accept": "application/json" },
+        onload: success,
+        onerror: onerror || function(response) { debug(response); }
     };
 }
 
@@ -350,16 +372,16 @@ function trello_post(path, data, success, error) {
 function updateBoardOptions(boards) {
     trace('enter updateBoardOptions');
     for ( var i in boards ) {
-	debug("board " + boards[i].id + " name: " + boards[i].name);
+        debug("board " + boards[i].id + " name: " + boards[i].name);
         waiting_callbacks[boards[i].id] = 1;
         board_ids[boards[i].id] = boards[i].name;
         GM_xmlhttpRequest(
-	    trello_get(
-	        sprintf('boards/%s/lists?filter=open', boards[i].id),
-	        function(response) {
-		    updateListOptions(JSON.parse(response.responseText));
-	        }
-	    )
+            trello_get(
+                sprintf('boards/%s/lists?filter=open', boards[i].id),
+                function(response) {
+                    updateListOptions(JSON.parse(response.responseText));
+                }
+            )
         );
     }
 }
