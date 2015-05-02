@@ -14,7 +14,7 @@
 // @require     https://api.trello.com/1/client.js?key=d141cd6874d46ba92770697e7721a614
 // @downloadURL https://github.com/jantman/userscripts/raw/master/TrelloContextMenu.user.js
 // @updateURL   https://github.com/jantman/userscripts/raw/master/TrelloContextMenu.user.js
-// @version     0.3.1
+// @version     0.3.2
 // ==/UserScript==
 
 // NOTE: Right now this only works in Firefox, as Firefox is the only browser that currently
@@ -237,16 +237,26 @@ function add_success_handler(response) {
     if (log_level >= log_levels.trace) { console.log('response: %o', response); }
     if (response.status == 401) {
         err("Got 401 response - need to re-authenticate");
-        GM_deleteValue('trello_user_token');
-        trello_user_token = '';
-        alert("ERROR: invalid authorization token; attempting to re-authorize. You must recreate the card when authorization is complete.");
-        trelloAuthorize();
+        handle_invalid_token();
+        return;
     } else if (response.status == 200) {
         cardinfo = JSON.parse(response.responseText);
         show_success_popup(cardinfo.url);
     } else {
         show_error_popup("Card creation got unknown status code: " + response.status.toString());
     }
+}
+
+function handle_invalid_token() {
+    trace("enter handle_invalid_token()");
+    GM_deleteValue('trello_user_token');
+    // for some reason, probably the direct access as "localStorage" (without "unsafeWindow"),
+    // calling Trello.deauthorize() here has no effect.
+    unsafeWindow.localStorage.removeItem('trello_token');
+    trello_user_token = '';
+    alert("ERROR: invalid authorization token; attempting to re-authorize. You must retry the previous action to complete authorization.");
+    trace("call trelloAuthorize()");
+    trelloAuthorize();
 }
 
 function show_success_popup(card_url) {
@@ -417,12 +427,8 @@ function loadTrelloBoards() {
                 delete waiting_callbacks['loadTrelloBoards'];
                 if (response.status != 200) {
                     if (/invalid token/i.test(response.responseText) || /unauthorized/i.test(response.statusText)) {
-                        warn('invalid token');
-                        $('div.trellopopup p.messages').html('An error has occurred.  Please try again');
-                        trello_user_token = null;
-                        store('trello_user_token', null);
-                        Trello.deauthorize();
-                        trelloAuthorize();
+                        err("got invalid token message in loadTrelloBoards()");
+                        handle_invalid_token();
                         return;
                     }
                 }
