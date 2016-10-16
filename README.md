@@ -4,6 +4,10 @@
 
 Some of my UserScripts
 
+## Note on Usage
+
+These scripts are tested against [GreaseMonkey](https://addons.mozilla.org/en-US/firefox/addon/greasemonkey/) in Firefox, and [TamperMonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en) in Chrome. Note that because of the apparent [walled garden](https://en.wikipedia.org/wiki/Closed_platform) mindset of Chrome (I guess in the false guise of "protecting users"), stock Chrome can't even install userscripts hosted on GitHub.
+
 ## [CopyMarkdownLink](https://raw.githubusercontent.com/jantman/userscripts/master/CopyMarkdownLink.user.js)
 
 Copy page title and location as a markdown link context menu entry, removing annoying Jira square-bracketed title.
