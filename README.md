@@ -15,3 +15,10 @@ Add page to a Trello board via context menu, with special handling for Jira, Git
 Loads a list of all of your boards and lists, and provides a context menu to add the current page to one of them.
 
 Also handles adding any selected text to the description.
+
+## [gw2_mmorpg-life_map_helper](https://raw.githubusercontent.com/jantman/userscripts/master/gw2_mmorpg-life_map_helper.user.js)
+
+I helper for the [Interactive Maps of Tyria](http://gw2.mmorpg-life.com/interactive-maps/) on [gw2.mmorpg-life.com](http://gw2.mmorpg-life.com/):
+
+* Allows you to independently toggle on and off types of icons, instead of seeing either one icon type or all of them.
+* Allows you to click an icon to hide it, to track completion.
