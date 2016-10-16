@@ -9,7 +9,7 @@
 // @grant       none
 // @downloadURL https://github.com/jantman/userscripts/raw/master/gw2_mmorpg-life_map_helper.user.js
 // @updateURL   https://github.com/jantman/userscripts/raw/master/gw2_mmorpg-life_map_helper.user.js
-// @version     1
+// @version     2
 // ==/UserScript==
 
 /*
@@ -46,7 +46,7 @@ var jantman_state = [1, 1, 1, 1, 1, 1];
 
 console.log("begin jantman onready");
 var jantman_div_content = [
-  '<div id="jantman_map_helper" style="background-color: #33ccff;">',
+  '<div id="jantman_map_helper" style="background-color: #9494b8;">',
   '<strong>Map Helper Userscript</strong>',
   '<p>Toggle: ',
   '<a id="jantman_click_hearts">Hearts</a>',
