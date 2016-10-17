@@ -12,36 +12,6 @@
 // @version     2
 // ==/UserScript==
 
-/*
-jQuery().ready(function() {
-    if(jQuery(".filter_chkbox").length > 0){
-        jQuery(".filter_chkbox").each(function(index) {
-            jQuery(this).click(function() {
-                if(jQuery(this).is(":checked")) 
-                {
-                    var clicked_chkbox_id=jQuery(this).attr('id');
-                    jQuery(".filter_chkbox").each(function(index2) {
-                        if(jQuery(this).attr('id')!=clicked_chkbox_id)
-                        {
-                            jQuery(this).attr('checked', false);
-                        }
-        
-                    });
-                    
-                    jQuery('.add_el').each(function(index) {
-                        jQuery(this).hide();
-                      }); 
-                      var event_type_id=jQuery(this).attr('id').replace(/[^\d\.]/g,'');
-                      jQuery('.'+event_type_id+'_type').each(function(index) {
-                        jQuery(this).show();
-                      });   
-                }
-            });
-        });
-    }
-});
-*/
-
 var jantman_state = [1, 1, 1, 1, 1, 1];
 
 console.log("begin jantman onready");
