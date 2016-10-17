@@ -9,10 +9,11 @@
 // @grant       none
 // @downloadURL https://github.com/jantman/userscripts/raw/master/gw2_mmorpg-life_map_helper.user.js
 // @updateURL   https://github.com/jantman/userscripts/raw/master/gw2_mmorpg-life_map_helper.user.js
-// @version     2
+// @version     3
 // ==/UserScript==
 
 var jantman_state = [1, 1, 1, 1, 1, 1];
+var jantman_undo = [];
 
 console.log("begin jantman onready");
 var jantman_div_content = [
@@ -28,7 +29,7 @@ var jantman_div_content = [
   '</p>',
   '<p>Use the toggle links above to toggle on/off (shown/hidden) types of icons.</p>',
   '<p>Click on an icon to hide it, i.e. for tracking completion. Right-click to visit the link for the icon.</p>',
-  '<p>To get clicked icons back, toggle that type of icon off and then back on (sorry, that\'s the best way I have right now).</p>',
+  '<p>To get clicked icons back: <a id="jantman_click_undo">Undo</a></p>',
   '<p>To restore the site\'s normal functionality, disable this script.</p>',
   '</div>'
 ].join('\n');
@@ -39,6 +40,10 @@ $('#jantman_click_POIs').click(function() { jantman_toggle_type(2); });
 $('#jantman_click_waypoints').click(function() { jantman_toggle_type(3); });
 $('#jantman_click_vistas').click(function() { jantman_toggle_type(4); });
 $('#jantman_click_events').click(function() { jantman_toggle_type(5); });
+$('#jantman_click_undo').click(function() {
+  item = jantman_undo.pop();
+  item.show();
+});
 
 // code to hide each individual thing
 $('.add_el').each(function(index) {
@@ -46,6 +51,7 @@ $('.add_el').each(function(index) {
   $(this).click(function() {
     if ($(this).is(":visible")) {
       $(this).hide();
+      jantman_undo.push(this);
     } else {
       $(this).show();
     }
@@ -63,6 +69,7 @@ $('.add_el').each(function(index) {
       // instead toggle the parent
       if (parent.is(":visible")) {
         parent.hide();
+        jantman_undo.push(parent);
       } else {
         parent.show();
       }
